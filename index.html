@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Таро Сайт</title>
+  <style>
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+      100% { transform: translateY(0px); }
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #a463f2, #7e3ff2, #bd6af2);
+      background-size: 400% 400%;
+      animation: gradient 10s ease infinite;
+      color: white;
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+    }
+
+    .left {
+      flex: 1;
+      background: url('bg.png') no-repeat center center;
+      background-size: cover;
+    }
+
+    .right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      backdrop-filter: blur(8px);
+    }
+
+    .price-list {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 30px 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(255,255,255,0.2);
+      animation: float 5s ease-in-out infinite;
+    }
+
+    .price-list h2 {
+      margin-top: 0;
+      font-size: 28px;
+      text-align: center;
+    }
+
+    .price-list ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .price-list ul li {
+      margin: 12px 0;
+      font-size: 18px;
+    }
+
+    .contacts {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .contacts a {
+      color: #fff;
+      margin: 0 10px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .contacts a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="left"></div>
+    <div class="right">
+      <div class="price-list">
+        <h2>Прайс-лист</h2>
+        <ul>
+          <li>Карты дня — 300₽</li>
+          <li>Полный расклад — 1500₽</li>
+          <li>Совет от карт — 500₽</li>
+          <li>Путь души — 1200₽</li>
+        </ul>
+      </div>
+      <div class="contacts">
+        <p>Контакты:</p>
+        <a href="https://t.me/your_telegram" target="_blank">Телеграм</a> |
+        <a href="https://wa.me/79991234567" target="_blank">WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
